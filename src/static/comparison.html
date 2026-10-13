@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ninfa Telemetria Industrial — Comparativo de Máquinas</title>
+    <link rel="stylesheet" href="/static/css/variables.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Navigation Header -->
+        <header class="navbar">
+            <div class="nav-inner">
+                <div class="nav-brand">
+                    <span class="brand-badge">NINFA</span>
+                    <div>
+                        <div class="brand-title">Telemetria Industrial</div>
+                        <div class="brand-subtitle">Monitoramento Preditivo · MEIU</div>
+                    </div>
+                </div>
+
+                <nav>
+                    <ul class="nav-links">
+                        <li><a href="/" class="nav-link">🏭 Visão Geral</a></li>
+                        <li><a href="/equipment" class="nav-link">🔍 Equipamento</a></li>
+                        <li><a href="/comparison" class="nav-link active">⚖️ Comparativo</a></li>
+                        <li><a href="/alarms" class="nav-link">🚨 Alarmes</a></li>
+                        <li><a href="/settings" class="nav-link">⚙️ Limites</a></li>
+                    </ul>
+                </nav>
+
+                <div class="nav-status">
+                    <div class="live-indicator">
+                        <span class="live-dot"></span>
+                        <span>OPC UA Ativo</span>
+                    </div>
+                    <span id="liveClock" style="font-family: var(--font-mono); font-size: 13px; color: var(--color-text-secondary);">--:--:--</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Comparativo entre Equipamentos e Sensores</h1>
+                    <p class="page-subtitle">Sobreposição de curvas de telemetria para identificar desvios entre mancais ou máquinas irmãs</p>
+                </div>
+            </div>
+
+            <!-- Toolbar de Seleção dos Dois Equipamentos -->
+            <div class="toolbar" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--spacing-md);">
+                <div>
+                    <label class="filter-label" style="display: block; margin-bottom: 4px;">Máquina A (Série 1):</label>
+                    <select id="selectEquipA" onchange="populateTagsA()" style="width: 100%;">
+                        <!-- Injetado dinamicamente -->
+                    </select>
+                    <div style="margin-top: 6px;">
+                        <label class="filter-label" style="display: block; margin-bottom: 2px;">Sensor A:</label>
+                        <select id="selectTagA" style="width: 100%;"></select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="filter-label" style="display: block; margin-bottom: 4px;">Máquina B (Série 2):</label>
+                    <select id="selectEquipB" onchange="populateTagsB()" style="width: 100%;">
+                        <!-- Injetado dinamicamente -->
+                    </select>
+                    <div style="margin-top: 6px;">
+                        <label class="filter-label" style="display: block; margin-bottom: 2px;">Sensor B:</label>
+                        <select id="selectTagB" style="width: 100%;"></select>
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; justify-content: flex-end; gap: 8px;">
+                    <div>
+                        <label class="filter-label" style="display: block; margin-bottom: 4px;">Janela Temporal:</label>
+                        <select id="selectWindow" style="width: 100%;">
+                            <option value="168">Últimos 7 Dias</option>
+                            <option value="720" selected>Últimos 30 Dias</option>
+                            <option value="2160">Últimos 90 Dias</option>
+                            <option value="8760">1 Ano Completo</option>
+                        </select>
+                    </div>
+                    <button class="btn-primary" onclick="executeComparison()" style="justify-content: center;">
+                        ⚖️ Executar Comparação
+                    </button>
+                </div>
+            </div>
+
+            <!-- Gráfico Comparativo -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title" id="compChartTitle">
+                        📈 Curvas Sobrepostas de Telemetria
+                    </div>
+                </div>
+                <div id="compChart">
+                    <div style="text-align: center; padding: 60px; color: var(--color-text-secondary);">
+                        Selecione as máquinas e sensores acima e clique em "Executar Comparação".
+                    </div>
+                </div>
+            </div>
+
+            <!-- Painel de Métricas Diferenciais -->
+            <div class="kpi-grid" id="diffKpis" style="display: none;">
+                <div class="kpi-card">
+                    <span class="kpi-label">Média Série A</span>
+                    <div class="kpi-value" id="kpiMeanA">--</div>
+                    <span class="kpi-subtext" id="kpiLabelA">--</span>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-label">Média Série B</span>
+                    <div class="kpi-value" id="kpiMeanB">--</div>
+                    <span class="kpi-subtext" id="kpiLabelB">--</span>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-label">Diferença Média (Δ)</span>
+                    <div class="kpi-value" id="kpiDelta">--</div>
+                    <span class="kpi-subtext">Variação absoluta entre mancais</span>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            Ninfa Alimentos · Projeto de Extensão MEIU — Monitoramento Industrial de Vibração e Temperatura
+        </footer>
+    </div>
+
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/charts.js"></script>
+    <script>
+        let allEquips = [];
+        let tagsByEquip = {};
+
+        async function initComparison() {
+            try {
+                allEquips = await api.getEquipments();
+                const selA = document.getElementById("selectEquipA");
+                const selB = document.getElementById("selectEquipB");
+
+                const optionsHtml = allEquips.map(e => `
+                    <option value="${e.equipamento_id}">${e.codigo} — ${e.descricao}</option>
+                `).join("");
+
+                selA.innerHTML = optionsHtml;
+                selB.innerHTML = optionsHtml;
+
+                // Selecionar máquina 1 e 2 por default
+                if (allEquips.length > 1) {
+                    selB.selectedIndex = 1;
+                }
+
+                await populateTagsA();
+                await populateTagsB();
+                await executeComparison();
+            } catch (err) {
+                showToast("Erro ao carregar dados: " + err.message, "error");
+            }
+        }
+
+        async function getEquipTags(equipId) {
+            if (!tagsByEquip[equipId]) {
+                const equip = await api.getEquipment(equipId);
+                tagsByEquip[equipId] = equip.tags || [];
+            }
+            return tagsByEquip[equipId];
+        }
+
+        async function populateTagsA() {
+            const equipId = parseInt(document.getElementById("selectEquipA").value);
+            const tags = await getEquipTags(equipId);
+            const selTag = document.getElementById("selectTagA");
+            selTag.innerHTML = tags.map(t => `
+                <option value="${t.no_id}">${t.ponto_medicao} · ${t.grandeza} (${t.unidade})</option>
+            `).join("");
+        }
+
+        async function populateTagsB() {
+            const equipId = parseInt(document.getElementById("selectEquipB").value);
+            const tags = await getEquipTags(equipId);
+            const selTag = document.getElementById("selectTagB");
+            selTag.innerHTML = tags.map(t => `
+                <option value="${t.no_id}">${t.ponto_medicao} · ${t.grandeza} (${t.unidade})</option>
+            `).join("");
+        }
+
+        async function executeComparison() {
+            try {
+                const tagIdA = parseInt(document.getElementById("selectTagA").value);
+                const tagIdB = parseInt(document.getElementById("selectTagB").value);
+                const windowH = parseInt(document.getElementById("selectWindow").value);
+
+                if (!tagIdA || !tagIdB) return;
+
+                const endMs = POC_FIM_MS;
+                const startMs = endMs - (windowH * 3600000);
+
+                const [resA, resB] = await Promise.all([
+                    api.getSeries(tagIdA, startMs, endMs, "auto"),
+                    api.getSeries(tagIdB, startMs, endMs, "auto")
+                ]);
+
+                const ptsA = resA.pontos || [];
+                const ptsB = resB.pontos || [];
+
+                const seriesList = [
+                    {
+                        name: `${resA.tag.equipamento_codigo} · ${resA.tag.ponto_medicao} (${resA.tag.grandeza})`,
+                        data: ptsA.map(p => ({ x: p.timestamp, y: p.media }))
+                    },
+                    {
+                        name: `${resB.tag.equipamento_codigo} · ${resB.tag.ponto_medicao} (${resB.tag.grandeza})`,
+                        data: ptsB.map(p => ({ x: p.timestamp, y: p.media }))
+                    }
+                ];
+
+                createComparisonChart("compChart", seriesList, resA.tag.unidade);
+
+                // Calcular métricas
+                const sumA = ptsA.reduce((acc, p) => acc + (p.media || 0), 0);
+                const avgA = ptsA.length > 0 ? (sumA / ptsA.length) : 0;
+
+                const sumB = ptsB.reduce((acc, p) => acc + (p.media || 0), 0);
+                const avgB = ptsB.length > 0 ? (sumB / ptsB.length) : 0;
+
+                const delta = Math.abs(avgA - avgB);
+
+                document.getElementById("diffKpis").style.display = "grid";
+                document.getElementById("kpiMeanA").textContent = `${avgA.toFixed(2)} ${resA.tag.unidade}`;
+                document.getElementById("kpiLabelA").textContent = resA.tag.equipamento_codigo;
+                document.getElementById("kpiMeanB").textContent = `${avgB.toFixed(2)} ${resB.tag.unidade}`;
+                document.getElementById("kpiLabelB").textContent = resB.tag.equipamento_codigo;
+                document.getElementById("kpiDelta").textContent = `${delta.toFixed(2)} ${resA.tag.unidade}`;
+
+            } catch (err) {
+                showToast("Erro ao processar comparativo: " + err.message, "error");
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", initComparison);
+    </script>
+</body>
+</html>

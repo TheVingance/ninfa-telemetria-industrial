@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ninfa Telemetria Industrial — Visão Geral</title>
+    <link rel="stylesheet" href="/static/css/variables.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Navigation Header -->
+        <header class="navbar">
+            <div class="nav-inner">
+                <div class="nav-brand">
+                    <span class="brand-badge">NINFA</span>
+                    <div>
+                        <div class="brand-title">Telemetria Industrial</div>
+                        <div class="brand-subtitle">Monitoramento Preditivo · MEIU</div>
+                    </div>
+                </div>
+
+                <nav>
+                    <ul class="nav-links">
+                        <li><a href="/" class="nav-link active">🏭 Visão Geral</a></li>
+                        <li><a href="/equipment" class="nav-link">🔍 Equipamento</a></li>
+                        <li><a href="/comparison" class="nav-link">⚖️ Comparativo</a></li>
+                        <li><a href="/alarms" class="nav-link">🚨 Alarmes</a></li>
+                        <li><a href="/settings" class="nav-link">⚙️ Limites</a></li>
+                    </ul>
+                </nav>
+
+                <div class="nav-status">
+                    <div class="live-indicator">
+                        <span class="live-dot"></span>
+                        <span>OPC UA Ativo</span>
+                    </div>
+                    <span id="liveClock" style="font-family: var(--font-mono); font-size: 13px; color: var(--color-text-secondary);">--:--:--</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Visão Geral do Parque Fabril</h1>
+                    <p class="page-subtitle">Monitoramento de Vibração Mecânica (ISO 10816) e Temperatura de Mancais em 10 Máquinas</p>
+                </div>
+                <div class="toolbar-actions">
+                    <button class="btn-primary" onclick="loadOverview()">🔄 Atualizar Dados</button>
+                </div>
+            </div>
+
+            <!-- KPIs Globais da Fábrica -->
+            <section class="kpi-grid">
+                <div class="kpi-card">
+                    <span class="kpi-label">Total de Equipamentos</span>
+                    <div class="kpi-value" id="kpiTotal">10</div>
+                    <span class="kpi-subtext">38 sensores mapeados</span>
+                </div>
+                <div class="kpi-card kpi-normal">
+                    <span class="kpi-label">Operação Normal</span>
+                    <div class="kpi-value" id="kpiNormal">--</div>
+                    <span class="kpi-subtext">Dentro dos limites seguros</span>
+                </div>
+                <div class="kpi-card kpi-atencao">
+                    <span class="kpi-label">Em Atenção</span>
+                    <div class="kpi-value" id="kpiAtencao">--</div>
+                    <span class="kpi-subtext">Próximo ao limiar de alerta</span>
+                </div>
+                <div class="kpi-card kpi-critico">
+                    <span class="kpi-label">Alerta Crítico</span>
+                    <div class="kpi-value" id="kpiCritico">--</div>
+                    <span class="kpi-subtext">Requer intervenção imediata</span>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-label">Saúde Fabril</span>
+                    <div class="kpi-value" id="kpiSaude">--%</div>
+                    <span class="kpi-subtext">Índice operacional geral</span>
+                </div>
+            </section>
+
+            <!-- Filtros de Busca -->
+            <div class="toolbar">
+                <div class="filter-group">
+                    <span class="filter-label">Filtrar por Status:</span>
+                    <button class="btn-pill active" onclick="filterStatus('todos', this)">Todos (10)</button>
+                    <button class="btn-pill" onclick="filterStatus('normal', this)">Normais</button>
+                    <button class="btn-pill" onclick="filterStatus('atencao', this)">Atenção</button>
+                    <button class="btn-pill" onclick="filterStatus('critico', this)">Críticos</button>
+                </div>
+                <div class="filter-group">
+                    <input type="text" id="searchInput" placeholder="Buscar por código ou descrição..." oninput="handleSearch()">
+                </div>
+            </div>
+
+            <!-- Grid de Equipamentos -->
+            <section class="equipment-grid" id="equipmentGrid">
+                <!-- Renderizado dinamicamente via JS -->
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--color-text-secondary);">
+                    Carregando dados das máquinas...
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            Ninfa Alimentos · Projeto de Extensão MEIU — Monitoramento Industrial de Vibração e Temperatura
+        </footer>
+    </div>
+
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script>
+        let allEquipments = [];
+        let currentStatusFilter = "todos";
+
+        async function loadOverview() {
+            try {
+                const data = await api.getFactoryOverview();
+                const kpis = data.kpis;
+                allEquipments = data.equipamentos;
+
+                document.getElementById("kpiTotal").textContent = kpis.total_equipamentos;
+                document.getElementById("kpiNormal").textContent = kpis.operacao_normal;
+                document.getElementById("kpiAtencao").textContent = kpis.em_atencao;
+                document.getElementById("kpiCritico").textContent = kpis.em_alerta_critico;
+                document.getElementById("kpiSaude").textContent = kpis.indice_saude_fabril + "%";
+
+                renderEquipmentCards();
+            } catch (err) {
+                showToast("Erro ao carregar dados da fábrica: " + err.message, "error");
+            }
+        }
+
+        function filterStatus(status, btn) {
+            currentStatusFilter = status;
+            document.querySelectorAll(".toolbar .btn-pill").forEach(b => b.classList.remove("active"));
+            if (btn) btn.classList.add("active");
+            renderEquipmentCards();
+        }
+
+        function handleSearch() {
+            renderEquipmentCards();
+        }
+
+        function renderEquipmentCards() {
+            const grid = document.getElementById("equipmentGrid");
+            const term = (document.getElementById("searchInput").value || "").toLowerCase();
+
+            const filtered = allEquipments.filter(eq => {
+                const matchesStatus = currentStatusFilter === "todos" || eq.status_geral === currentStatusFilter;
+                const matchesTerm = eq.codigo.toLowerCase().includes(term) || eq.descricao.toLowerCase().includes(term);
+                return matchesStatus && matchesTerm;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--color-text-secondary);">
+                        Nenhum equipamento encontrado com os filtros selecionados.
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(eq => {
+                // Separar leituras por ponto e grandeza
+                const readings = eq.leituras_recentes || [];
+                const tempP01 = readings.find(r => r.ponto_medicao === "P01" && r.grandeza === "TEMPERATURA");
+                const vibP01 = readings.find(r => r.ponto_medicao === "P01" && r.grandeza === "VIBRACAO_RMS");
+                const tempP02 = readings.find(r => r.ponto_medicao === "P02" && r.grandeza === "TEMPERATURA");
+                const vibP02 = readings.find(r => r.ponto_medicao === "P02" && r.grandeza === "VIBRACAO_RMS");
+
+                const statusLabels = {
+                    normal: "Normal",
+                    atencao: "Atenção",
+                    critico: "Crítico",
+                    sem_sinal: "Sem Sinal"
+                };
+
+                function getValClass(reading) {
+                    if (!reading) return "";
+                    if (reading.status_operacional === "critico") return "critical";
+                    if (reading.status_operacional === "atencao") return "alert";
+                    return "";
+                }
+
+                return `
+                    <div class="machine-card" onclick="window.location.href='/equipment?id=${eq.equipamento_id}'">
+                        <div>
+                            <div class="machine-header">
+                                <div>
+                                    <div class="machine-code">${eq.codigo}</div>
+                                    <div class="machine-desc">${eq.descricao}</div>
+                                </div>
+                                <span class="status-badge ${eq.status_geral}">${statusLabels[eq.status_geral] || eq.status_geral}</span>
+                            </div>
+
+                            <div class="readings-summary" style="margin-top: 14px;">
+                                <div class="reading-pill">
+                                    <span class="reading-pill-label">P01 Temp</span>
+                                    <span class="reading-pill-val ${getValClass(tempP01)}">
+                                        ${tempP01 ? tempP01.valor + " °C" : "--"}
+                                    </span>
+                                </div>
+                                <div class="reading-pill">
+                                    <span class="reading-pill-label">P01 Vibração</span>
+                                    <span class="reading-pill-val ${getValClass(vibP01)}">
+                                        ${vibP01 ? vibP01.valor + " mm/s" : "--"}
+                                    </span>
+                                </div>
+                                <div class="reading-pill">
+                                    <span class="reading-pill-label">P02 Temp</span>
+                                    <span class="reading-pill-val ${getValClass(tempP02)}">
+                                        ${tempP02 ? tempP02.valor + " °C" : "--"}
+                                    </span>
+                                </div>
+                                <div class="reading-pill">
+                                    <span class="reading-pill-label">P02 Vibração</span>
+                                    <span class="reading-pill-val ${getValClass(vibP02)}">
+                                        ${vibP02 ? vibP02.valor + " mm/s" : "--"}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="machine-footer">
+                            <span>🔍 Clique para abrir análise detalhada</span>
+                            <span>${formatDateTime(eq.ultimo_timestamp_ms)}</span>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+        }
+
+        document.addEventListener("DOMContentLoaded", loadOverview);
+    </script>
+</body>
+</html>

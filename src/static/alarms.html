@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ninfa Telemetria Industrial — Central de Alarmes</title>
+    <link rel="stylesheet" href="/static/css/variables.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Navigation Header -->
+        <header class="navbar">
+            <div class="nav-inner">
+                <div class="nav-brand">
+                    <span class="brand-badge">NINFA</span>
+                    <div>
+                        <div class="brand-title">Telemetria Industrial</div>
+                        <div class="brand-subtitle">Monitoramento Preditivo · MEIU</div>
+                    </div>
+                </div>
+
+                <nav>
+                    <ul class="nav-links">
+                        <li><a href="/" class="nav-link">🏭 Visão Geral</a></li>
+                        <li><a href="/equipment" class="nav-link">🔍 Equipamento</a></li>
+                        <li><a href="/comparison" class="nav-link">⚖️ Comparativo</a></li>
+                        <li><a href="/alarms" class="nav-link active">🚨 Alarmes</a></li>
+                        <li><a href="/settings" class="nav-link">⚙️ Limites</a></li>
+                    </ul>
+                </nav>
+
+                <div class="nav-status">
+                    <div class="live-indicator">
+                        <span class="live-dot"></span>
+                        <span>OPC UA Ativo</span>
+                    </div>
+                    <span id="liveClock" style="font-family: var(--font-mono); font-size: 13px; color: var(--color-text-secondary);">--:--:--</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Central de Eventos e Alarmes Industriais</h1>
+                    <p class="page-subtitle">Histórico consolidado de ultrapassagem de limites e falhas de comunicação OPC UA</p>
+                </div>
+                <div>
+                    <button class="btn-primary" onclick="exportCsv()">📥 Exportar CSV</button>
+                </div>
+            </div>
+
+            <!-- KPIs de Alarmes -->
+            <section class="kpi-grid">
+                <div class="kpi-card kpi-critico">
+                    <span class="kpi-label">Alarmes Críticos</span>
+                    <div class="kpi-value" id="alarmCritCount">--</div>
+                    <span class="kpi-subtext">LSE Crítico ou StatusCode Bad</span>
+                </div>
+                <div class="kpi-card kpi-atencao">
+                    <span class="kpi-label">Alertas de Atenção</span>
+                    <div class="kpi-value" id="alarmAtenCount">--</div>
+                    <span class="kpi-subtext">Limiar de atenção ou Uncertain</span>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-label">Desvios de Processo</span>
+                    <div class="kpi-value" id="alarmProcCount">--</div>
+                    <span class="kpi-subtext">Temperatura / Vibração mecânica</span>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-label">Falhas de Coleta (Rede)</span>
+                    <div class="kpi-value" id="alarmCommCount">--</div>
+                    <span class="kpi-subtext">Erros de comunicação OPC UA</span>
+                </div>
+            </section>
+
+            <!-- Filtros de Ocorrência -->
+            <div class="toolbar">
+                <div class="filter-group">
+                    <span class="filter-label">Severidade:</span>
+                    <select id="filterSev" onchange="loadAlarms()">
+                        <option value="">Todas</option>
+                        <option value="critico">Apenas Críticos</option>
+                        <option value="atencao">Apenas Atenção</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <span class="filter-label">Tipo:</span>
+                    <select id="filterTipo" onchange="loadAlarms()">
+                        <option value="">Todos os Tipos</option>
+                        <option value="limite_processo">Desvio de Limite</option>
+                        <option value="qualidade_dado">Falha de Comunicação</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <span class="filter-label">Equipamento:</span>
+                    <select id="filterEquip" onchange="loadAlarms()">
+                        <option value="">Todos os Equipamentos</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <span class="filter-label">Qtd:</span>
+                    <select id="filterLimit" onchange="loadAlarms()">
+                        <option value="50">50 registros</option>
+                        <option value="100" selected>100 registros</option>
+                        <option value="250">250 registros</option>
+                        <option value="500">500 registros</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Tabela de Alarmes -->
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Data / Hora</th>
+                            <th>Equipamento</th>
+                            <th>Ponto / Grandeza</th>
+                            <th>Valor Registrado</th>
+                            <th>Limites (Atenção / Crítico)</th>
+                            <th>Status OPC UA</th>
+                            <th>Severidade</th>
+                            <th>Diagnóstico</th>
+                        </tr>
+                    </thead>
+                    <tbody id="alarmsTableBody">
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 40px; color: var(--color-text-secondary);">
+                                Carregando ocorrências de alarme...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+
+        <footer class="footer">
+            Ninfa Alimentos · Projeto de Extensão MEIU — Monitoramento Industrial de Vibração e Temperatura
+        </footer>
+    </div>
+
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script>
+        let currentEvents = [];
+
+        async function initAlarmsPage() {
+            try {
+                // Preencher dropdown de equipamentos
+                const equips = await api.getEquipments();
+                const sel = document.getElementById("filterEquip");
+                equips.forEach(e => {
+                    const opt = document.createElement("option");
+                    opt.value = e.equipamento_id;
+                    opt.textContent = `${e.codigo} — ${e.descricao}`;
+                    sel.appendChild(opt);
+                });
+
+                // Carregar resumo
+                const summary = await api.getAlarmsSummary();
+                document.getElementById("alarmCritCount").textContent = summary.total_critico;
+                document.getElementById("alarmAtenCount").textContent = summary.total_atencao;
+                document.getElementById("alarmProcCount").textContent = summary.falhas_processo;
+                document.getElementById("alarmCommCount").textContent = summary.falhas_comunicacao;
+
+                await loadAlarms();
+            } catch (err) {
+                showToast("Erro ao carregar central de alarmes: " + err.message, "error");
+            }
+        }
+
+        async function loadAlarms() {
+            try {
+                const filters = {
+                    severidade: document.getElementById("filterSev").value || null,
+                    tipoAlarme: document.getElementById("filterTipo").value || null,
+                    equipamentoId: document.getElementById("filterEquip").value || null,
+                    limit: parseInt(document.getElementById("filterLimit").value) || 100,
+                };
+
+                const data = await api.getAlarms(filters);
+                currentEvents = data.eventos || [];
+                renderAlarmsTable();
+            } catch (err) {
+                showToast("Falha ao buscar alarmes: " + err.message, "error");
+            }
+        }
+
+        function renderAlarmsTable() {
+            const tbody = document.getElementById("alarmsTableBody");
+
+            if (currentEvents.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 40px; color: var(--color-text-secondary);">
+                            Nenhum alarme encontrado com os filtros selecionados.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = currentEvents.map(ev => {
+                const statusBadgeClass = ev.status_code === 0 ? "normal" : (ev.status_code === 1073741824 ? "atencao" : "critico");
+                const statusName = ev.status_code === 0 ? "Good" : (ev.status_code === 1073741824 ? "Uncertain" : "Bad");
+
+                return `
+                    <tr>
+                        <td class="mono" style="white-space: nowrap;">${formatDateTime(ev.source_timestamp_ms)}</td>
+                        <td>
+                            <strong>${ev.equipamento_codigo}</strong><br>
+                            <span style="font-size: 11px; color: var(--color-text-secondary);">${ev.equipamento_descricao}</span>
+                        </td>
+                        <td>
+                            <span style="font-weight: 600;">${ev.ponto_medicao}</span> · ${ev.grandeza}
+                        </td>
+                        <td class="mono" style="font-weight: 700; color: ${ev.severidade === 'critico' ? 'var(--color-status-critico)' : 'var(--color-status-atencao)'};">
+                            ${ev.valor !== null ? ev.valor + " " + ev.unidade : "--"}
+                        </td>
+                        <td class="mono" style="font-size: 11px; color: var(--color-text-secondary);">
+                            Atenção: ${ev.limite_atencao || '--'} | Crítico: ${ev.limite_critico || '--'}
+                        </td>
+                        <td>
+                            <span class="status-badge ${statusBadgeClass}">${statusName}</span>
+                        </td>
+                        <td>
+                            <span class="status-badge ${ev.severidade}">${ev.severidade.toUpperCase()}</span>
+                        </td>
+                        <td style="font-size: 12px;">
+                            ${ev.mensagem}
+                        </td>
+                    </tr>
+                `;
+            }).join("");
+        }
+
+        function exportCsv() {
+            if (!currentEvents.length) {
+                showToast("Nenhum dado para exportar.", "info");
+                return;
+            }
+
+            const headers = ["Timestamp", "Data/Hora", "Equipamento", "Descricao", "Ponto", "Grandeza", "Valor", "Unidade", "Limite_Atencao", "Limite_Critico", "StatusCode", "Severidade", "Mensagem"];
+            const rows = currentEvents.map(e => [
+                e.source_timestamp_ms,
+                `"${formatDateTime(e.source_timestamp_ms)}"`,
+                `"${e.equipamento_codigo}"`,
+                `"${e.equipamento_descricao}"`,
+                `"${e.ponto_medicao}"`,
+                `"${e.grandeza}"`,
+                e.valor,
+                `"${e.unidade}"`,
+                e.limite_atencao,
+                e.limite_critico,
+                e.status_code,
+                `"${e.severidade}"`,
+                `"${e.mensagem}"`
+            ]);
+
+            const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `alarmes_ninfa_${Date.now()}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            showToast("Relatório CSV gerado com sucesso!", "success");
+        }
+
+        document.addEventListener("DOMContentLoaded", initAlarmsPage);
+    </script>
+</body>
+</html>

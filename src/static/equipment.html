@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ninfa Telemetria Industrial — Análise de Equipamento</title>
+    <link rel="stylesheet" href="/static/css/variables.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Navigation Header -->
+        <header class="navbar">
+            <div class="nav-inner">
+                <div class="nav-brand">
+                    <span class="brand-badge">NINFA</span>
+                    <div>
+                        <div class="brand-title">Telemetria Industrial</div>
+                        <div class="brand-subtitle">Monitoramento Preditivo · MEIU</div>
+                    </div>
+                </div>
+
+                <nav>
+                    <ul class="nav-links">
+                        <li><a href="/" class="nav-link">🏭 Visão Geral</a></li>
+                        <li><a href="/equipment" class="nav-link active">🔍 Equipamento</a></li>
+                        <li><a href="/comparison" class="nav-link">⚖️ Comparativo</a></li>
+                        <li><a href="/alarms" class="nav-link">🚨 Alarmes</a></li>
+                        <li><a href="/settings" class="nav-link">⚙️ Limites</a></li>
+                    </ul>
+                </nav>
+
+                <div class="nav-status">
+                    <div class="live-indicator">
+                        <span class="live-dot"></span>
+                        <span>OPC UA Ativo</span>
+                    </div>
+                    <span id="liveClock" style="font-family: var(--font-mono); font-size: 13px; color: var(--color-text-secondary);">--:--:--</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Toolbar de Seleção e Período -->
+            <div class="toolbar">
+                <div class="filter-group">
+                    <span class="filter-label">Equipamento:</span>
+                    <select id="selectEquip" onchange="onEquipChange()">
+                        <option value="">Carregando máquinas...</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <span class="filter-label">Janela Temporal:</span>
+                    <button class="btn-pill" onclick="setTimeWindow(24, this)">24 Horas</button>
+                    <button class="btn-pill" onclick="setTimeWindow(168, this)">7 Dias</button>
+                    <button class="btn-pill active" onclick="setTimeWindow(720, this)">30 Dias</button>
+                    <button class="btn-pill" onclick="setTimeWindow(8760, this)">1 Ano Completo</button>
+                </div>
+
+                <div class="filter-group">
+                    <span class="filter-label">Resolução:</span>
+                    <select id="selectBucket" onchange="loadEquipmentData()">
+                        <option value="auto">Automático</option>
+                        <option value="5min">5 Minutos</option>
+                        <option value="15min">15 Minutos</option>
+                        <option value="1h">1 Hora</option>
+                        <option value="6h">6 Horas</option>
+                        <option value="1d">1 Dia</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Banner do Equipamento Selecionado -->
+            <div class="chart-card" style="margin-bottom: var(--spacing-lg);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: var(--spacing-md);">
+                    <div>
+                        <h1 class="page-title" id="equipTitle">--</h1>
+                        <p class="page-subtitle" id="equipDesc">--</p>
+                    </div>
+                    <div style="display: flex; gap: var(--spacing-md); align-items: center;">
+                        <div style="text-align: right;">
+                            <div style="font-size: 11px; color: var(--color-text-secondary); text-transform: uppercase;">Latência Ingestão (Δt)</div>
+                            <div id="equipLatency" style="font-family: var(--font-mono); font-size: 16px; font-weight: 700; color: #ffffff;">-- ms</div>
+                        </div>
+                        <span id="equipStatusBadge" class="status-badge normal">Normal</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card de Análise Preditiva -->
+            <div class="predictive-banner" id="predictiveBanner">
+                <div class="predictive-title">
+                    <span>⚡ Análise Preditiva de Tendência & Risco de LSE</span>
+                </div>
+                <div class="predictive-message" id="predictiveMessage">
+                    Calculando tendências baseadas no histórico de telemetria...
+                </div>
+                <div class="predictive-metrics">
+                    <div class="predictive-metric-item">
+                        <span class="predictive-metric-label">Taxa de Variação</span>
+                        <span class="predictive-metric-value" id="predSlope">-- /h</span>
+                    </div>
+                    <div class="predictive-metric-item">
+                        <span class="predictive-metric-label">Tempo até Limite Atenção</span>
+                        <span class="predictive-metric-value" id="predHoursAtt">--</span>
+                    </div>
+                    <div class="predictive-metric-item">
+                        <span class="predictive-metric-label">Tempo até Limite Crítico</span>
+                        <span class="predictive-metric-value" id="predHoursCrit">--</span>
+                    </div>
+                    <div class="predictive-metric-item">
+                        <span class="predictive-metric-label">Confiança do Ajuste (R²)</span>
+                        <span class="predictive-metric-value" id="predR2">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráficos de Temperatura e Vibração -->
+            <div style="display: grid; grid-template-columns: 1fr; gap: var(--spacing-lg);">
+                <!-- Gráfico de Temperatura -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            🌡️ Temperatura dos Mancais (°C) — P01 vs P02
+                        </div>
+                    </div>
+                    <div id="tempChart"></div>
+                </div>
+
+                <!-- Gráfico de Vibração RMS -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            📳 Vibração Mecânica RMS (mm/s) — ISO 10816-1
+                        </div>
+                    </div>
+                    <div id="vibChart"></div>
+                </div>
+            </div>
+
+            <!-- Qualidade de Dados OPC UA -->
+            <div class="chart-card" style="margin-top: var(--spacing-lg);">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        🛡️ Integridade do Sinal & Qualidade OPC UA (PoC)
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--spacing-lg); align-items: center;">
+                    <div id="qualityDonut"></div>
+                    <div id="qualityStats" style="display: flex; flex-direction: column; gap: 10px;">
+                        <!-- Injetado dinamicamente -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            Ninfa Alimentos · Projeto de Extensão MEIU — Monitoramento Industrial de Vibração e Temperatura
+        </footer>
+    </div>
+
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/charts.js"></script>
+    <script>
+        let currentEquipId = 1;
+        let windowHours = 720; // 30 dias padrão
+
+        async function initPage() {
+            try {
+                // Ler ID da query string (?id=X)
+                const urlParams = new URLSearchParams(window.location.search);
+                const qId = urlParams.get("id");
+                if (qId) currentEquipId = parseInt(qId);
+
+                // Carregar dropdown de máquinas
+                const equips = await api.getEquipments();
+                const select = document.getElementById("selectEquip");
+                select.innerHTML = equips.map(e => `
+                    <option value="${e.equipamento_id}" ${e.equipamento_id === currentEquipId ? 'selected' : ''}>
+                        ${e.codigo} — ${e.descricao}
+                    </option>
+                `).join("");
+
+                await loadEquipmentData();
+            } catch (err) {
+                showToast("Erro ao carregar equipamentos: " + err.message, "error");
+            }
+        }
+
+        function onEquipChange() {
+            currentEquipId = parseInt(document.getElementById("selectEquip").value);
+            window.history.replaceState(null, "", `/equipment?id=${currentEquipId}`);
+            loadEquipmentData();
+        }
+
+        function setTimeWindow(hours, btn) {
+            windowHours = hours;
+            document.querySelectorAll(".toolbar .btn-pill").forEach(b => b.classList.remove("active"));
+            if (btn) btn.classList.add("active");
+            loadEquipmentData();
+        }
+
+        async function loadEquipmentData() {
+            try {
+                const equip = await api.getEquipment(currentEquipId);
+                document.getElementById("equipTitle").textContent = equip.codigo;
+                document.getElementById("equipDesc").textContent = equip.descricao;
+
+                // Definir tags de temperatura e vibração
+                const tags = equip.tags || [];
+                const tempTags = tags.filter(t => t.grandeza === "TEMPERATURA");
+                const vibTags = tags.filter(t => t.grandeza === "VIBRACAO_RMS");
+
+                const bucket = document.getElementById("selectBucket").value;
+                const endMs = POC_FIM_MS;
+                const startMs = endMs - (windowHours * 3600000);
+
+                // Status operacional recente
+                const readings = equip.leituras_recentes || [];
+                let worstStatus = "normal";
+                let maxLat = 0;
+                readings.forEach(r => {
+                    if (r.status_operacional === "critico") worstStatus = "critico";
+                    else if (r.status_operacional === "atencao" && worstStatus !== "critico") worstStatus = "atencao";
+                    if (r.latencia_ms > maxLat) maxLat = r.latencia_ms;
+                });
+
+                const badge = document.getElementById("equipStatusBadge");
+                badge.className = `status-badge ${worstStatus}`;
+                badge.textContent = worstStatus.toUpperCase();
+                document.getElementById("equipLatency").textContent = maxLat + " ms";
+
+                // Carregar séries temporais de Temperatura
+                const tempSeries = [];
+                for (const t of tempTags) {
+                    const data = await api.getSeries(t.no_id, startMs, endMs, bucket);
+                    tempSeries.push({
+                        name: `${t.ponto_medicao} (${t.node_id})`,
+                        data: (data.pontos || []).map(p => ({ x: p.timestamp, y: p.media }))
+                    });
+                }
+                const firstTempTag = tempTags[0] || {};
+                createComparisonChart("tempChart", tempSeries, "°C");
+
+                // Carregar séries temporais de Vibração
+                const vibSeries = [];
+                for (const t of vibTags) {
+                    const data = await api.getSeries(t.no_id, startMs, endMs, bucket);
+                    vibSeries.push({
+                        name: `${t.ponto_medicao} (${t.node_id})`,
+                        data: (data.pontos || []).map(p => ({ x: p.timestamp, y: p.media }))
+                    });
+                }
+                createComparisonChart("vibChart", vibSeries, "mm/s");
+
+                // Análise Preditiva do Ponto Principal (P01 Temp)
+                if (tempTags.length > 0) {
+                    const pred = await api.getPredictive(tempTags[0].no_id, Math.min(windowHours, 168), endMs);
+                    const ins = pred.analise_preditiva;
+
+                    const banner = document.getElementById("predictiveBanner");
+                    banner.className = `predictive-banner ${ins.status || ''}`;
+                    document.getElementById("predictiveMessage").textContent = ins.mensagem;
+                    document.getElementById("predSlope").textContent = (ins.slope_per_hour > 0 ? "+" : "") + ins.slope_per_hour + " °C/h";
+                    document.getElementById("predHoursAtt").textContent = ins.hours_to_attention ? `~${ins.hours_to_attention} h` : "Não iminente";
+                    document.getElementById("predHoursCrit").textContent = ins.hours_to_critical ? `~${ins.hours_to_critical} h` : "Não iminente";
+                    document.getElementById("predR2").textContent = (ins.r2 * 100).toFixed(1) + "%";
+                }
+
+                // Qualidade de Dados OPC UA
+                if (tags.length > 0) {
+                    const qual = await api.getQuality(tags[0].no_id, startMs, endMs);
+                    createQualityDonut("qualityDonut", qual.good_count, qual.uncertain_count, qual.bad_count);
+
+                    document.getElementById("qualityStats").innerHTML = `
+                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--color-border); padding-bottom: 6px;">
+                            <span style="color: var(--color-status-normal); font-weight: 600;">Good (0x00000000):</span>
+                            <span class="mono">${qual.good_count.toLocaleString()} leituras (${qual.good_pct}%)</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--color-border); padding-bottom: 6px;">
+                            <span style="color: var(--color-status-atencao); font-weight: 600;">Uncertain (0x40000000):</span>
+                            <span class="mono">${qual.uncertain_count.toLocaleString()} leituras (${qual.uncertain_pct}%)</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--color-border); padding-bottom: 6px;">
+                            <span style="color: var(--color-status-critico); font-weight: 600;">Bad (0x80000000):</span>
+                            <span class="mono">${qual.bad_count.toLocaleString()} leituras (${qual.bad_pct}%)</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding-top: 4px;">
+                            <span style="color: var(--color-text-secondary);">Latência Média de Ingestão:</span>
+                            <span class="mono" style="font-weight: 700;">${qual.latencia_media_ms} ms</span>
+                        </div>
+                    `;
+                }
+
+            } catch (err) {
+                showToast("Erro ao carregar telemetria da máquina: " + err.message, "error");
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", initPage);
+    </script>
+</body>
+</html>

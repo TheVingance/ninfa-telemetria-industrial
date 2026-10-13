@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ninfa Telemetria Industrial — Configuração de Limites</title>
+    <link rel="stylesheet" href="/static/css/variables.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Navigation Header -->
+        <header class="navbar">
+            <div class="nav-inner">
+                <div class="nav-brand">
+                    <span class="brand-badge">NINFA</span>
+                    <div>
+                        <div class="brand-title">Telemetria Industrial</div>
+                        <div class="brand-subtitle">Monitoramento Preditivo · MEIU</div>
+                    </div>
+                </div>
+
+                <nav>
+                    <ul class="nav-links">
+                        <li><a href="/" class="nav-link">🏭 Visão Geral</a></li>
+                        <li><a href="/equipment" class="nav-link">🔍 Equipamento</a></li>
+                        <li><a href="/comparison" class="nav-link">⚖️ Comparativo</a></li>
+                        <li><a href="/alarms" class="nav-link">🚨 Alarmes</a></li>
+                        <li><a href="/settings" class="nav-link active">⚙️ Limites</a></li>
+                    </ul>
+                </nav>
+
+                <div class="nav-status">
+                    <div class="live-indicator">
+                        <span class="live-dot"></span>
+                        <span>OPC UA Ativo</span>
+                    </div>
+                    <span id="liveClock" style="font-family: var(--font-mono); font-size: 13px; color: var(--color-text-secondary);">--:--:--</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Configuração de Limites Operacionais (LIE / LSE)</h1>
+                    <p class="page-subtitle">Ajuste fino dos limiares de Atenção e Crítico para as 38 tags do Anexo A (persiste no banco de dados)</p>
+                </div>
+            </div>
+
+            <!-- Toolbar de Filtro -->
+            <div class="toolbar">
+                <div class="filter-group">
+                    <span class="filter-label">Filtrar Máquina:</span>
+                    <select id="filterEquip" onchange="renderTagsTable()">
+                        <option value="">Todas as Máquinas (38 tags)</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <span class="filter-label">Grandeza:</span>
+                    <select id="filterGrandeza" onchange="renderTagsTable()">
+                        <option value="">Todas as Grandezas</option>
+                        <option value="TEMPERATURA">Temperatura (°C)</option>
+                        <option value="VIBRACAO_RMS">Vibração RMS (mm/s)</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <input type="text" id="filterSearch" placeholder="Filtrar por código ou nó..." oninput="renderTagsTable()">
+                </div>
+            </div>
+
+            <!-- Tabela de Tags e Limites -->
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Nó ID</th>
+                            <th>Equipamento</th>
+                            <th>Ponto</th>
+                            <th>Grandeza</th>
+                            <th>Unidade</th>
+                            <th>Limite Atenção</th>
+                            <th>Limite Crítico</th>
+                            <th>NodeId OPC UA</th>
+                            <th style="text-align: right;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tagsTableBody">
+                        <tr>
+                            <td colspan="9" style="text-align: center; padding: 40px; color: var(--color-text-secondary);">
+                                Carregando tabela de mapeamento...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+
+        <!-- Modal de Edição de Limites -->
+        <div id="editModal" class="modal-backdrop" style="display: none;">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="modalTagTitle">Ajustar Limites da Tag</h2>
+                    <button onclick="closeModal()" style="background: none; border: none; color: var(--color-text-secondary); font-size: 20px; cursor: pointer;">&times;</button>
+                </div>
+                <form id="editForm" onsubmit="handleSaveLimits(event)">
+                    <input type="hidden" id="modalNoId">
+                    <div style="margin-bottom: 14px;">
+                        <label style="display: block; font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px;">Equipamento & Ponto:</label>
+                        <input type="text" id="modalEquipDesc" disabled style="width: 100%; opacity: 0.7;">
+                    </div>
+                    <div style="margin-bottom: 14px;">
+                        <label style="display: block; font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px;">Limite de Atenção (Amarelo):</label>
+                        <input type="number" step="0.1" id="modalLimAten" required style="width: 100%;">
+                    </div>
+                    <div style="margin-bottom: 14px;">
+                        <label style="display: block; font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px;">Limite Crítico (Vermelho):</label>
+                        <input type="number" step="0.1" id="modalLimCrit" required style="width: 100%;">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-pill" onclick="closeModal()">Cancelar</button>
+                        <button type="submit" class="btn-primary">💾 Salvar Limites</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <footer class="footer">
+            Ninfa Alimentos · Projeto de Extensão MEIU — Monitoramento Industrial de Vibração e Temperatura
+        </footer>
+    </div>
+
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script>
+        let allTags = [];
+
+        async function initSettingsPage() {
+            try {
+                // Preencher select de equipamentos
+                const equips = await api.getEquipments();
+                const sel = document.getElementById("filterEquip");
+                equips.forEach(e => {
+                    const opt = document.createElement("option");
+                    opt.value = e.equipamento_id;
+                    opt.textContent = `${e.codigo} — ${e.descricao}`;
+                    sel.appendChild(opt);
+                });
+
+                // Carregar todas as tags
+                allTags = await api.getTags();
+                renderTagsTable();
+            } catch (err) {
+                showToast("Erro ao carregar configurações: " + err.message, "error");
+            }
+        }
+
+        function renderTagsTable() {
+            const tbody = document.getElementById("tagsTableBody");
+            const equipFilter = document.getElementById("filterEquip").value;
+            const grandezaFilter = document.getElementById("filterGrandeza").value;
+            const search = (document.getElementById("filterSearch").value || "").toLowerCase();
+
+            const filtered = allTags.filter(t => {
+                const matchesEquip = !equipFilter || t.equipamento_id === parseInt(equipFilter);
+                const matchesGran = !grandezaFilter || t.grandeza === grandezaFilter;
+                const matchesSearch = !search ||
+                    t.equipamento_codigo.toLowerCase().includes(search) ||
+                    t.node_id.toLowerCase().includes(search) ||
+                    t.ponto_medicao.toLowerCase().includes(search);
+                return matchesEquip && matchesGran && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" style="text-align: center; padding: 40px; color: var(--color-text-secondary);">
+                            Nenhuma tag encontrada com os filtros especificados.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(t => `
+                <tr>
+                    <td class="mono" style="font-weight: 600;">#${t.no_id}</td>
+                    <td>
+                        <strong>${t.equipamento_codigo}</strong><br>
+                        <span style="font-size: 11px; color: var(--color-text-secondary);">${t.equipamento_descricao}</span>
+                    </td>
+                    <td><span class="status-badge normal" style="font-size: 10px;">${t.ponto_medicao}</span></td>
+                    <td><strong>${t.grandeza}</strong></td>
+                    <td class="mono">${t.unidade}</td>
+                    <td class="mono" style="color: var(--color-status-atencao); font-weight: 600;">
+                        ${t.limite_atencao !== null ? t.limite_atencao + " " + t.unidade : "--"}
+                    </td>
+                    <td class="mono" style="color: var(--color-status-critico); font-weight: 700;">
+                        ${t.limite_critico !== null ? t.limite_critico + " " + t.unidade : "--"}
+                    </td>
+                    <td class="mono" style="font-size: 11px; color: var(--color-text-muted);">${t.node_id}</td>
+                    <td style="text-align: right;">
+                        <button class="btn-pill" onclick='openEditModal(${JSON.stringify(t)})'>✏️ Editar</button>
+                    </td>
+                </tr>
+            `).join("");
+        }
+
+        function openEditModal(tag) {
+            document.getElementById("modalNoId").value = tag.no_id;
+            document.getElementById("modalTagTitle").textContent = `Editar Limites — Nó #${tag.no_id}`;
+            document.getElementById("modalEquipDesc").value = `${tag.equipamento_codigo} · ${tag.ponto_medicao} (${tag.grandeza})`;
+            document.getElementById("modalLimAten").value = tag.limite_atencao;
+            document.getElementById("modalLimCrit").value = tag.limite_critico;
+            document.getElementById("editModal").style.display = "flex";
+        }
+
+        function closeModal() {
+            document.getElementById("editModal").style.display = "none";
+        }
+
+        async function handleSaveLimits(e) {
+            e.preventDefault();
+            const noId = parseInt(document.getElementById("modalNoId").value);
+            const limAten = parseFloat(document.getElementById("modalLimAten").value);
+            const limCrit = parseFloat(document.getElementById("modalLimCrit").value);
+
+            if (limCrit <= limAten) {
+                showToast("O Limite Crítico deve ser estritamente maior que o Limite de Atenção.", "error");
+                return;
+            }
+
+            try {
+                const res = await api.updateTagLimits(noId, limAten, limCrit);
+                showToast("Limites atualizados com sucesso!", "success");
+
+                // Atualizar na memória local
+                const idx = allTags.findIndex(t => t.no_id === noId);
+                if (idx !== -1) {
+                    allTags[idx].limite_atencao = limAten;
+                    allTags[idx].limite_critico = limCrit;
+                }
+
+                closeModal();
+                renderTagsTable();
+            } catch (err) {
+                showToast("Erro ao salvar limites: " + err.message, "error");
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", initSettingsPage);
+    </script>
+</body>
+</html>
