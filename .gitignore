@@ -1,0 +1,67 @@
+# ============================================================
+# .gitignore — Projeto Ninfa Telemetria Industrial
+# ============================================================
+
+# -----------------------------------------------
+# Base de dados SQLite (370 MB — excede limite do GitHub)
+# -----------------------------------------------
+*.sqlite
+*.sqlite3
+*.db
+
+# -----------------------------------------------
+# Python
+# -----------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+*.whl
+
+# Ambientes virtuais
+venv/
+.venv/
+env/
+.env/
+ENV/
+
+# -----------------------------------------------
+# IDEs e Editores
+# -----------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+
+# -----------------------------------------------
+# Sistema Operacional
+# -----------------------------------------------
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+.DS_Store?
+
+# -----------------------------------------------
+# Arquivos temporários e logs
+# -----------------------------------------------
+*.log
+*.tmp
+*.bak
+*.orig
+scratch/
+
+# -----------------------------------------------
+# Variáveis de ambiente e secrets
+# -----------------------------------------------
+.env
+.env.local
+.env.production
