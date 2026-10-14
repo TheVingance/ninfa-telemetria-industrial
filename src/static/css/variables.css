@@ -1,22 +1,24 @@
 /* ============================================================
    Ninfa Telemetria Industrial — Design Tokens & CSS Variables
-   Tema industrial escuro (Dark Theme)
+   Temas: Escuro Industrial (Padrão) e Claro de Alto Contraste
    ============================================================ */
 
 :root {
-    /* --- Paleta Principal --- */
+    /* --- Paleta Principal (Escuro) --- */
     --color-bg-primary:       #0f1419;
     --color-bg-secondary:     #1a1f2e;
     --color-bg-card:          #1e2538;
     --color-bg-hover:         #252d42;
     --color-border:           #2a3348;
+    --color-navbar-bg:        rgba(26, 31, 46, 0.88);
+    --color-modal-backdrop:   rgba(0, 0, 0, 0.75);
 
     /* --- Texto --- */
     --color-text-primary:     #e4e8f1;
     --color-text-secondary:   #8892a8;
     --color-text-muted:       #5a6478;
 
-    /* --- Status Operacional --- */
+    /* --- Status Operacional (ISA-101) --- */
     --color-status-normal:    #10b981;   /* Verde esmeralda */
     --color-status-atencao:   #f59e0b;   /* Âmbar */
     --color-status-critico:   #ef4444;   /* Vermelho */
@@ -56,4 +58,39 @@
     --transition-fast:        150ms ease;
     --transition-base:        250ms ease;
     --transition-slow:        400ms ease;
+}
+
+/* ============================================================
+   Tema Claro (Light Theme)
+   ============================================================ */
+[data-theme="light"] {
+    --color-bg-primary:       #f1f5f9;
+    --color-bg-secondary:     #ffffff;
+    --color-bg-card:          #ffffff;
+    --color-bg-hover:         #f8fafc;
+    --color-border:           #cbd5e1;
+    --color-navbar-bg:        rgba(255, 255, 255, 0.92);
+    --color-modal-backdrop:   rgba(15, 23, 42, 0.5);
+
+    --color-text-primary:     #0f172a;
+    --color-text-secondary:   #475569;
+    --color-text-muted:       #94a3b8;
+
+    --color-status-normal:    #059669;
+    --color-status-atencao:   #d97706;
+    --color-status-critico:   #dc2626;
+    --color-status-sem-sinal: #64748b;
+
+    --color-opc-good:         #059669;
+    --color-opc-uncertain:    #d97706;
+    --color-opc-bad:          #dc2626;
+
+    --color-accent:           #2563eb;
+    --color-accent-hover:     #1d4ed8;
+    --color-accent-glow:      rgba(37, 99, 235, 0.12);
+
+    --shadow-card:            0 1px 3px 0 rgba(0, 0, 0, 0.1),
+                              0 1px 2px -1px rgba(0, 0, 0, 0.08);
+    --shadow-elevated:        0 10px 25px -5px rgba(15, 23, 42, 0.1),
+                              0 8px 10px -6px rgba(15, 23, 42, 0.06);
 }
