@@ -17,7 +17,7 @@ Antes de gerar código para qualquer funcionalidade, você (Agente) **DEVE**:
 1. **Inspecionar o Banco SQLite:** Nunca assuma nomes de colunas ou tipos sem antes verificar o schema real do arquivo SQLite (`sqlite_master`) e o conteúdo da tabela `metadado_poc`.
 2. **Garantir Desacoplamento (Oracle-Ready):** Perguntar a si mesmo: *"Se trocarmos o SQLite pelo Oracle amanhã, este código fora da camada de repositório continuará funcionando?"* Se a resposta for não, refatore.
 3. **Avaliar Impacto de Performance:** Lembrar que a tabela `leitura_opcua` possui quase **4 milhões de linhas**. Nunca faça `SELECT *` sem paginação, agregação temporal (downsampling) ou filtros indexados.
-4. **Criação Obrigatória de Artefato de Plano de Implementação:** Para toda nova funcionalidade, alteração estrutural ou módulo a ser implementado, o Agente **DEVE** obrigatoriamente criar um artefato de plano de implementação detalhado antes de propor, gerar ou modificar qualquer código no repositório.
+4. **Criação Obrigatória de Artefato de Plano de Implementação e Aprovação Prévia:** Para toda nova funcionalidade, alteração estrutural ou correção a ser implementada, o Agente **DEVE** obrigatoriamente criar um artefato de plano de implementação detalhado, apresentar a proposta e **aguardar a expressa avaliação e aprovação do usuário antes de gerar, propor ou modificar qualquer código no repositório**. É estritamente proibido iniciar a codificação ou alterações de arquivos sem a validação do plano pelo usuário.
 
 ---
 
