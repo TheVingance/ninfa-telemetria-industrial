@@ -8,7 +8,7 @@ e registra os roteadores da API REST.
 from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from src.config import (
@@ -80,14 +80,10 @@ def page_alarms():
 
 @app.get("/limites", summary="Página de Configuração de Limites", include_in_schema=False)
 @app.get("/limites.html", include_in_schema=False)
+@app.get("/settings", include_in_schema=False)
+@app.get("/settings.html", include_in_schema=False)
 def page_limites():
     return FileResponse(STATIC_DIR / "limites.html")
-
-
-@app.get("/settings", summary="Redirecionamento para /limites", include_in_schema=False)
-@app.get("/settings.html", include_in_schema=False)
-def page_settings_redirect():
-    return RedirectResponse(url="/limites", status_code=307)
 
 
 @app.get("/favicon.ico", include_in_schema=False)
