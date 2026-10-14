@@ -51,19 +51,26 @@ function showToast(message, type = "info") {
     }, 4000);
 }
 
-// Destacar página atual na navegação
+// Destacar estritamente a página atual na navegação
 function setupNavigation() {
-    const path = window.location.pathname.replace(/\/$/, "") || "/";
+    let currentPath = window.location.pathname.toLowerCase();
+    if (currentPath === "" || currentPath === "/" || currentPath.endsWith("/index.html")) {
+        currentPath = "/";
+    } else {
+        currentPath = currentPath.replace(/\.html$/, "").replace(/\/$/, "");
+    }
+
     const navLinks = document.querySelectorAll(".nav-link");
 
     navLinks.forEach((link) => {
-        const href = link.getAttribute("href").replace(/\/$/, "");
-        if (
-            (path === "" || path === "/" || path === "/index.html") &&
-            (href === "/" || href === "/index.html")
-        ) {
-            link.classList.add("active");
-        } else if (href !== "/" && path.includes(href)) {
+        let linkHref = (link.getAttribute("href") || "").toLowerCase();
+        if (linkHref === "" || linkHref === "/" || linkHref.endsWith("/index.html")) {
+            linkHref = "/";
+        } else {
+            linkHref = linkHref.replace(/\.html$/, "").replace(/\/$/, "");
+        }
+
+        if (currentPath === linkHref) {
             link.classList.add("active");
         } else {
             link.classList.remove("active");
