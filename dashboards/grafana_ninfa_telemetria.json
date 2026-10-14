@@ -1,0 +1,981 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Dashboard Oficial para Monitoramento de Vibração e Temperatura Industrial — Ninfa Alimentos / MEIU",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 100,
+      "title": "Visão Geral da Máquina e Conectividade OPC UA",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "normal": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "NORMAL / OPERAÇÃO ESTÁVEL"
+                },
+                "atencao": {
+                  "color": "yellow",
+                  "index": 1,
+                  "text": "ATENÇÃO / LIMIAR PRÓXIMO"
+                },
+                "critico": {
+                  "color": "red",
+                  "index": 2,
+                  "text": "CRÍTICO / ALARME ATIVO"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 1
+      },
+      "id": 1,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^status_operacional$/",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "columns": [],
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${datasource}"
+          },
+          "filters": [],
+          "format": "table",
+          "refId": "A",
+          "root_selector": "",
+          "source": "url",
+          "type": "json",
+          "url": "/api/grafana/overview",
+          "url_options": {
+            "method": "GET"
+          }
+        }
+      ],
+      "title": "Status da Planta",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "decimals": 2,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 65
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 1
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^valor$/",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "columns": [],
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${datasource}"
+          },
+          "filters": [],
+          "format": "table",
+          "refId": "A",
+          "root_selector": "",
+          "source": "url",
+          "type": "json",
+          "url": "/api/grafana/series?no_id=${tag}&bucket=${bucket}&from=${__from}&to=${__to}",
+          "url_options": {
+            "method": "GET"
+          }
+        }
+      ],
+      "title": "Última Medição da Tag",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 2500
+              },
+              {
+                "color": "red",
+                "value": 5000
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 1
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "/^latencia_ms$/",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "columns": [],
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${datasource}"
+          },
+          "filters": [],
+          "format": "table",
+          "refId": "A",
+          "root_selector": "",
+          "source": "url",
+          "type": "json",
+          "url": "/api/grafana/series?no_id=${tag}&bucket=${bucket}&from=${__from}&to=${__to}",
+          "url_options": {
+            "method": "GET"
+          }
+        }
+      ],
+      "title": "Latência Média de Ingestão",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "Bad": {
+                  "color": "red",
+                  "index": 2,
+                  "text": "BAD / FALHA DE SENSOR"
+                },
+                "Good": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "GOOD / SINAL VÁLIDO"
+                },
+                "Uncertain": {
+                  "color": "yellow",
+                  "index": 1,
+                  "text": "UNCERTAIN / INCERTO"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 1
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^qualidade$/",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "columns": [],
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${datasource}"
+          },
+          "filters": [],
+          "format": "table",
+          "refId": "A",
+          "root_selector": "",
+          "source": "url",
+          "type": "json",
+          "url": "/api/grafana/series?no_id=${tag}&bucket=${bucket}&from=${__from}&to=${__to}",
+          "url_options": {
+            "method": "GET"
+          }
+        }
+      ],
+      "title": "Qualidade do Sinal (OPC UA)",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
+      "id": 101,
+      "title": "Séries Temporais e Limiares de Engenharia (LIE / LSE)",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "fillOpacity": 12
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "valor"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Valor Médio"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#38bdf8",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "minimo"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Mínimo"
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [
+                    4,
+                    4
+                  ],
+                  "fill": "dash"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#94a3b8",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "maximo"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Máximo"
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [
+                    4,
+                    4
+                  ],
+                  "fill": "dash"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#cbd5e1",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "limite_atencao"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Limite Atenção"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#f59e0b",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [
+                    8,
+                    4
+                  ],
+                  "fill": "dash"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "limite_critico"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Limite Crítico"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#ef4444",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [
+                    8,
+                    4
+                  ],
+                  "fill": "dash"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 16,
+        "x": 0,
+        "y": 6
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "min",
+            "max",
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "columns": [],
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${datasource}"
+          },
+          "filters": [],
+          "format": "timeseries",
+          "refId": "A",
+          "root_selector": "",
+          "source": "url",
+          "type": "json",
+          "url": "/api/grafana/series?no_id=${tag}&bucket=${bucket}&from=${__from}&to=${__to}",
+          "url_options": {
+            "method": "GET"
+          }
+        }
+      ],
+      "title": "Tendência Temporal da Tag Selecionada",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 60,
+            "lineWidth": 1
+          },
+          "unit": "ms"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "latencia_ms"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#8b5cf6",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Latência (ms)"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 16,
+        "y": 6
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "columns": [],
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${datasource}"
+          },
+          "filters": [],
+          "format": "timeseries",
+          "refId": "A",
+          "root_selector": "",
+          "source": "url",
+          "type": "json",
+          "url": "/api/grafana/series?no_id=${tag}&bucket=${bucket}&from=${__from}&to=${__to}",
+          "url_options": {
+            "method": "GET"
+          }
+        }
+      ],
+      "title": "Latência de Ingestão da Rede (recebido_em - source_ts)",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 15
+      },
+      "id": 102,
+      "title": "Central de Alarmes e Eventos Industriais",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [
+            {
+              "options": {
+                "atencao": {
+                  "color": "yellow",
+                  "index": 1,
+                  "text": "ATENÇÃO"
+                },
+                "critico": {
+                  "color": "red",
+                  "index": 0,
+                  "text": "CRÍTICO"
+                },
+                "informativo": {
+                  "color": "blue",
+                  "index": 2,
+                  "text": "INFO"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "severidade"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "color-background"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "id": 7,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "time"
+          }
+        ]
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "columns": [],
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${datasource}"
+          },
+          "filters": [],
+          "format": "table",
+          "refId": "A",
+          "root_selector": "",
+          "source": "url",
+          "type": "json",
+          "url": "/api/grafana/alarms?equipamento_id=${equipamento}&from=${__from}&to=${__to}&limit=100",
+          "url_options": {
+            "method": "GET"
+          }
+        }
+      ],
+      "title": "Registro de Anomalias e Eventos Fora de Limite",
+      "type": "table"
+    }
+  ],
+  "refresh": "1m",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [
+    "ninfa",
+    "telemetria",
+    "opc-ua",
+    "vibração",
+    "temperatura",
+    "industria-4.0"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "hide": 0,
+        "includeAll": false,
+        "label": "Data Source",
+        "multi": false,
+        "name": "datasource",
+        "options": [],
+        "query": "yesoreyeram-infinity-datasource",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "MBF1.1FRN01 — FORNO",
+          "value": "1"
+        },
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "${datasource}"
+        },
+        "definition": "/api/grafana/variables/equipments",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Equipamento",
+        "multi": false,
+        "name": "equipamento",
+        "options": [],
+        "query": {
+          "infinity": {
+            "columns": [
+              {
+                "selector": "text",
+                "text": "text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "value",
+                "type": "string"
+              }
+            ],
+            "format": "table",
+            "refId": "variable_query",
+            "source": "url",
+            "type": "json",
+            "url": "/api/grafana/variables/equipments",
+            "url_options": {
+              "method": "GET"
+            }
+          }
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "P01 — VIBRACAO_RMS (mm/s)",
+          "value": "1"
+        },
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "${datasource}"
+        },
+        "definition": "/api/grafana/variables/tags?equipamento_id=${equipamento}",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Ponto / Grandeza (Tag)",
+        "multi": false,
+        "name": "tag",
+        "options": [],
+        "query": {
+          "infinity": {
+            "columns": [
+              {
+                "selector": "text",
+                "text": "text",
+                "type": "string"
+              },
+              {
+                "selector": "value",
+                "text": "value",
+                "type": "string"
+              }
+            ],
+            "format": "table",
+            "refId": "variable_query",
+            "source": "url",
+            "type": "json",
+            "url": "/api/grafana/variables/tags?equipamento_id=${equipamento}",
+            "url_options": {
+              "method": "GET"
+            }
+          }
+        },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "auto",
+          "value": "auto"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Resolução (Bucket)",
+        "multi": false,
+        "name": "bucket",
+        "options": [
+          {
+            "selected": true,
+            "text": "auto (Dinâmico)",
+            "value": "auto"
+          },
+          {
+            "selected": false,
+            "text": "5min (Bruto)",
+            "value": "5min"
+          },
+          {
+            "selected": false,
+            "text": "15min",
+            "value": "15min"
+          },
+          {
+            "selected": false,
+            "text": "1h (Horário)",
+            "value": "1h"
+          },
+          {
+            "selected": false,
+            "text": "6h",
+            "value": "6h"
+          },
+          {
+            "selected": false,
+            "text": "1d (Diário)",
+            "value": "1d"
+          }
+        ],
+        "query": "auto,5min,15min,1h,6h,1d",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      }
+    ]
+  },
+  "time": {
+    "from": "2026-08-23T00:00:00.000Z",
+    "to": "2026-09-22T23:55:00.000Z"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "1h"
+    ]
+  },
+  "timezone": "utc",
+  "title": "Ninfa Alimentos — Telemetria Industrial OPC UA",
+  "uid": "ninfa-telemetria-opcua",
+  "version": 1,
+  "weekStart": ""
+}

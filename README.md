@@ -38,12 +38,15 @@ ninfa-telemetria-industrial/
 ├── .gitignore
 ├── README.md
 ├── requirements.txt
+├── dashboards/                  # Painéis exportáveis para Grafana
+│   └── grafana_ninfa_telemetria.json
 ├── data/                        # Base SQLite (não versionada — ver .gitignore)
 ├── docs/                        # Documentação técnica do projeto
 │   ├── SPEC.md
 │   ├── Auditoria do SQLite Ninfa.md
 │   ├── Plano de implementação e estrutura.md
-│   └── GUIA_TRANSICAO_ORACLE.md
+│   ├── GUIA_TRANSICAO_ORACLE.md
+│   └── GUIA_INTEGRACAO_GRAFANA.md
 ├── scripts/                     # Scripts de seed e manutenção do banco
 │   ├── seed_anexo_a.py
 │   └── optimize_indexes.sql
@@ -60,7 +63,7 @@ ninfa-telemetria-industrial/
         ├── equipment.html       # Análise por Equipamento
         ├── comparison.html      # Comparativo de Máquinas
         ├── alarms.html          # Central de Alarmes
-        └── settings.html        # Configuração de Limites
+        └── limites.html         # Configuração de Limites
 ```
 
 ---
@@ -69,7 +72,7 @@ ninfa-telemetria-industrial/
 
 ### Pré-requisitos
 - Python 3.12+
-- Arquivo `On_Time_POC_OPCUA_1_ano.sqlite` na pasta `data/`
+- Arquivo `On_Time_POC_OPCUA_1_ano.sqlite` na pasta raiz ou `data/`
 
 ### Instalação
 ```bash
@@ -95,6 +98,16 @@ python -m uvicorn src.main:app --reload --port 8000
 ### Acesso
 - **Aplicação Web:** http://localhost:8000
 - **Documentação da API (Swagger):** http://localhost:8000/docs
+- **Endpoints Grafana:** http://localhost:8000/api/grafana/health
+
+---
+
+## Integração com Grafana
+
+A aplicação disponibiliza integração completa com o ecossistema **Grafana**:
+- **Dashboard Pronto para Importação:** [`dashboards/grafana_ninfa_telemetria.json`](dashboards/grafana_ninfa_telemetria.json) contendo séries temporais, thresholds de LIE/LSE, KPIs de última medição e central de alarmes.
+- **API REST (Plugin Infinity):** Rota `/api/grafana/series` com downsampling automático e compatibilidade com as variáveis `${__from}` e `${__to}`.
+- **Guia Passo a Passo:** Consulte o [`docs/GUIA_INTEGRACAO_GRAFANA.md`](docs/GUIA_INTEGRACAO_GRAFANA.md) para instruções detalhadas de instalação do plugin, criação do data source e consultas SQL nativas para Oracle/SQLite.
 
 ---
 

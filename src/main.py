@@ -23,6 +23,7 @@ from src.routes import (
     telemetry_router,
     tags_router,
     alarms_router,
+    grafana_router,
 )
 
 app = FastAPI(
@@ -47,6 +48,7 @@ app.include_router(equipments_router)
 app.include_router(telemetry_router)
 app.include_router(tags_router)
 app.include_router(alarms_router)
+app.include_router(grafana_router)
 
 # Montar arquivos estáticos (CSS, JS, assets)
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
