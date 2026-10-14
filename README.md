@@ -1,4 +1,4 @@
-# 🏭 Ninfa Telemetria Industrial
+# Ninfa Telemetria Industrial
 
 **Prova de Conceito (PoC)** — Monitoramento de Vibração e Temperatura em equipamentos industriais do parque fabril da **Ninfa Alimentos**.
 
@@ -6,7 +6,7 @@
 
 ---
 
-## 📋 Sobre o Projeto
+## Sobre o Projeto
 
 Aplicação Web completa (Backend + Frontend) para:
 
@@ -18,7 +18,7 @@ Aplicação Web completa (Backend + Frontend) para:
 
 ---
 
-## 🏗️ Stack Tecnológica
+## Stack Tecnológica
 
 | Camada | Tecnologia |
 | :--- | :--- |
@@ -31,7 +31,7 @@ Aplicação Web completa (Backend + Frontend) para:
 
 ---
 
-## 📁 Estrutura do Repositório
+## Estrutura do Repositório
 
 ```
 ninfa-telemetria-industrial/
@@ -42,7 +42,8 @@ ninfa-telemetria-industrial/
 ├── docs/                        # Documentação técnica do projeto
 │   ├── SPEC.md
 │   ├── Auditoria do SQLite Ninfa.md
-│   └── Plano de implementação e estrutura.md
+│   ├── Plano de implementação e estrutura.md
+│   └── GUIA_TRANSICAO_ORACLE.md
 ├── scripts/                     # Scripts de seed e manutenção do banco
 │   ├── seed_anexo_a.py
 │   └── optimize_indexes.sql
@@ -64,7 +65,7 @@ ninfa-telemetria-industrial/
 
 ---
 
-## 🚀 Como Executar
+## Como Executar
 
 ### Pré-requisitos
 - Python 3.12+
@@ -97,7 +98,7 @@ python -m uvicorn src.main:app --reload --port 8000
 
 ---
 
-## 📊 Escopo dos Dados (PoC)
+## Escopo dos Dados (PoC)
 
 | Métrica | Valor |
 | :--- | :--- |
@@ -109,7 +110,7 @@ python -m uvicorn src.main:app --reload --port 8000
 
 ---
 
-## 🤝 Equipe
+## Equipe
 
 | Papel | Responsável |
 | :--- | :--- |
@@ -118,6 +119,7 @@ python -m uvicorn src.main:app --reload --port 8000
 
 ---
 
-## 📄 Licença
+## Licença
 
 Projeto acadêmico de extensão. Código restrito ao escopo da parceria MEIU–Ninfa Alimentos.
+

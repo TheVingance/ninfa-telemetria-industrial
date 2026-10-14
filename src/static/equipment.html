@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ninfa Telemetria Industrial — Análise de Equipamento</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <link rel="stylesheet" href="/static/css/variables.css">
     <link rel="stylesheet" href="/static/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
@@ -23,15 +24,41 @@
 
                 <nav>
                     <ul class="nav-links">
-                        <li><a href="/" class="nav-link">🏭 Visão Geral</a></li>
-                        <li><a href="/equipment" class="nav-link active">🔍 Equipamento</a></li>
-                        <li><a href="/comparison" class="nav-link">⚖️ Comparativo</a></li>
-                        <li><a href="/alarms" class="nav-link">🚨 Alarmes</a></li>
-                        <li><a href="/settings" class="nav-link">⚙️ Limites</a></li>
+                        <li>
+                            <a href="/" class="nav-link">
+                                <svg class="icon-svg" viewBox="0 0 24 24"><path d="M2 20h20"></path><path d="M6 20V10l5 3V4l7 4v12"></path></svg>
+                                <span>Visão Geral</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/equipment" class="nav-link">
+                                <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                <span>Equipamento</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/comparison" class="nav-link">
+                                <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M13 6h3a2 2 0 0 1 2 2v7"></path><path d="M11 18H8a2 2 0 0 1-2-2V9"></path></svg>
+                                <span>Comparativo</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/alarms" class="nav-link">
+                                <svg class="icon-svg" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                <span>Alarmes</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/settings" class="nav-link">
+                                <svg class="icon-svg" viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+                                <span>Limites</span>
+                            </a>
+                        </li>
                     </ul>
                 </nav>
 
                 <div class="nav-status">
+                    <button id="themeToggleBtn" class="theme-toggle-btn" type="button" aria-label="Alternar Tema"></button>
                     <div class="live-indicator">
                         <span class="live-dot"></span>
                         <span>OPC UA Ativo</span>
@@ -83,7 +110,7 @@
                     <div style="display: flex; gap: var(--spacing-md); align-items: center;">
                         <div style="text-align: right;">
                             <div style="font-size: 11px; color: var(--color-text-secondary); text-transform: uppercase;">Latência Ingestão (Δt)</div>
-                            <div id="equipLatency" style="font-family: var(--font-mono); font-size: 16px; font-weight: 700; color: #ffffff;">-- ms</div>
+                            <div id="equipLatency" style="font-family: var(--font-mono); font-size: 16px; font-weight: 700;">-- ms</div>
                         </div>
                         <span id="equipStatusBadge" class="status-badge normal">Normal</span>
                     </div>
@@ -93,7 +120,8 @@
             <!-- Card de Análise Preditiva -->
             <div class="predictive-banner" id="predictiveBanner">
                 <div class="predictive-title">
-                    <span>⚡ Análise Preditiva de Tendência & Risco de LSE</span>
+                    <svg class="icon-svg" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                    <span>Análise Preditiva de Tendência & Risco de LSE</span>
                 </div>
                 <div class="predictive-message" id="predictiveMessage">
                     Calculando tendências baseadas no histórico de telemetria...
@@ -124,7 +152,8 @@
                 <div class="chart-card">
                     <div class="chart-header">
                         <div class="chart-title">
-                            🌡️ Temperatura dos Mancais (°C) — P01 vs P02
+                            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path></svg>
+                            <span>Temperatura dos Mancais (°C) — P01 vs P02</span>
                         </div>
                     </div>
                     <div id="tempChart"></div>
@@ -134,7 +163,8 @@
                 <div class="chart-card">
                     <div class="chart-header">
                         <div class="chart-title">
-                            📳 Vibração Mecânica RMS (mm/s) — ISO 10816-1
+                            <svg class="icon-svg" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                            <span>Vibração Mecânica RMS (mm/s) — ISO 10816-1</span>
                         </div>
                     </div>
                     <div id="vibChart"></div>
@@ -145,7 +175,8 @@
             <div class="chart-card" style="margin-top: var(--spacing-lg);">
                 <div class="chart-header">
                     <div class="chart-title">
-                        🛡️ Integridade do Sinal & Qualidade OPC UA (PoC)
+                        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                        <span>Integridade do Sinal & Qualidade OPC UA (PoC)</span>
                     </div>
                 </div>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--spacing-lg); align-items: center;">
@@ -167,16 +198,14 @@
     <script src="/static/js/charts.js"></script>
     <script>
         let currentEquipId = 1;
-        let windowHours = 720; // 30 dias padrão
+        let windowHours = 720;
 
         async function initPage() {
             try {
-                // Ler ID da query string (?id=X)
                 const urlParams = new URLSearchParams(window.location.search);
                 const qId = urlParams.get("id");
                 if (qId) currentEquipId = parseInt(qId);
 
-                // Carregar dropdown de máquinas
                 const equips = await api.getEquipments();
                 const select = document.getElementById("selectEquip");
                 select.innerHTML = equips.map(e => `
@@ -186,6 +215,11 @@
                 `).join("");
 
                 await loadEquipmentData();
+
+                // Atualizar gráficos quando o tema for alternado
+                window.addEventListener("themeChanged", () => {
+                    loadEquipmentData();
+                });
             } catch (err) {
                 showToast("Erro ao carregar equipamentos: " + err.message, "error");
             }
@@ -210,7 +244,6 @@
                 document.getElementById("equipTitle").textContent = equip.codigo;
                 document.getElementById("equipDesc").textContent = equip.descricao;
 
-                // Definir tags de temperatura e vibração
                 const tags = equip.tags || [];
                 const tempTags = tags.filter(t => t.grandeza === "TEMPERATURA");
                 const vibTags = tags.filter(t => t.grandeza === "VIBRACAO_RMS");
@@ -219,7 +252,6 @@
                 const endMs = POC_FIM_MS;
                 const startMs = endMs - (windowHours * 3600000);
 
-                // Status operacional recente
                 const readings = equip.leituras_recentes || [];
                 let worstStatus = "normal";
                 let maxLat = 0;
@@ -234,7 +266,7 @@
                 badge.textContent = worstStatus.toUpperCase();
                 document.getElementById("equipLatency").textContent = maxLat + " ms";
 
-                // Carregar séries temporais de Temperatura
+                // Séries de Temperatura
                 const tempSeries = [];
                 for (const t of tempTags) {
                     const data = await api.getSeries(t.no_id, startMs, endMs, bucket);
@@ -243,21 +275,29 @@
                         data: (data.pontos || []).map(p => ({ x: p.timestamp, y: p.media }))
                     });
                 }
-                const firstTempTag = tempTags[0] || {};
                 createComparisonChart("tempChart", tempSeries, "°C");
 
-                // Carregar séries temporais de Vibração
-                const vibSeries = [];
-                for (const t of vibTags) {
-                    const data = await api.getSeries(t.no_id, startMs, endMs, bucket);
-                    vibSeries.push({
-                        name: `${t.ponto_medicao} (${t.node_id})`,
-                        data: (data.pontos || []).map(p => ({ x: p.timestamp, y: p.media }))
-                    });
+                // Séries de Vibração (Chiller não possui vibração)
+                const vibChartContainer = document.getElementById("vibChart").parentElement;
+                if (vibTags.length === 0) {
+                    document.getElementById("vibChart").innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: var(--color-text-secondary);">
+                            Este equipamento (${equip.descricao}) não possui sensores de vibração mecânica (conforme especificação técnica).
+                        </div>
+                    `;
+                } else {
+                    const vibSeries = [];
+                    for (const t of vibTags) {
+                        const data = await api.getSeries(t.no_id, startMs, endMs, bucket);
+                        vibSeries.push({
+                            name: `${t.ponto_medicao} (${t.node_id})`,
+                            data: (data.pontos || []).map(p => ({ x: p.timestamp, y: p.media }))
+                        });
+                    }
+                    createComparisonChart("vibChart", vibSeries, "mm/s");
                 }
-                createComparisonChart("vibChart", vibSeries, "mm/s");
 
-                // Análise Preditiva do Ponto Principal (P01 Temp)
+                // Análise Preditiva
                 if (tempTags.length > 0) {
                     const pred = await api.getPredictive(tempTags[0].no_id, Math.min(windowHours, 168), endMs);
                     const ins = pred.analise_preditiva;
