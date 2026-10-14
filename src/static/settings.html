@@ -54,7 +54,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="/settings" class="nav-link">
+                            <a href="/limites" class="nav-link">
                                 <svg class="icon-svg" viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
                                 <span>Limites</span>
                             </a>
@@ -217,7 +217,19 @@
                 return;
             }
 
-            tbody.innerHTML = filtered.map(t => `
+            tbody.innerHTML = filtered.map(t => {
+                const isTemp = t.grandeza === "TEMPERATURA";
+                const unitBadgeClass = isTemp ? "unit-temp" : "unit-vib";
+
+                const atencaoHtml = t.limite_atencao !== null
+                    ? `<span class="limit-chip warning"><span class="limit-chip-val">${t.limite_atencao}</span><span class="limit-chip-unit">${t.unidade}</span></span>`
+                    : `<span style="color: var(--color-text-muted);">--</span>`;
+
+                const criticoHtml = t.limite_critico !== null
+                    ? `<span class="limit-chip critical"><span class="limit-chip-val">${t.limite_critico}</span><span class="limit-chip-unit">${t.unidade}</span></span>`
+                    : `<span style="color: var(--color-text-muted);">--</span>`;
+
+                return `
                 <tr>
                     <td class="mono" style="font-weight: 600;">#${t.no_id}</td>
                     <td>
@@ -226,13 +238,9 @@
                     </td>
                     <td><span class="status-badge normal" style="font-size: 10px;">${t.ponto_medicao}</span></td>
                     <td><strong>${t.grandeza}</strong></td>
-                    <td class="mono">${t.unidade}</td>
-                    <td class="mono" style="color: var(--color-status-atencao); font-weight: 600;">
-                        ${t.limite_atencao !== null ? t.limite_atencao + " " + t.unidade : "--"}
-                    </td>
-                    <td class="mono" style="color: var(--color-status-critico); font-weight: 700;">
-                        ${t.limite_critico !== null ? t.limite_critico + " " + t.unidade : "--"}
-                    </td>
+                    <td><span class="unit-badge ${unitBadgeClass}">${t.unidade}</span></td>
+                    <td>${atencaoHtml}</td>
+                    <td>${criticoHtml}</td>
                     <td class="mono" style="font-size: 11px; color: var(--color-text-muted);">${t.node_id}</td>
                     <td style="text-align: right;">
                         <button class="btn-pill" onclick='openEditModal(${JSON.stringify(t)})'>
@@ -241,7 +249,8 @@
                         </button>
                     </td>
                 </tr>
-            `).join("");
+            `;
+            }).join("");
         }
 
         function openEditModal(tag) {
