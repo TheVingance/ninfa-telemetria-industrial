@@ -84,6 +84,11 @@ def page_settings():
     return FileResponse(STATIC_DIR / "settings.html")
 
 
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    return FileResponse(STATIC_DIR / "favicon.svg", media_type="image/svg+xml")
+
+
 # -------------------------------------------------------------
 # Health Check
 # -------------------------------------------------------------
